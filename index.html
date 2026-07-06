@@ -1,4 +1,4 @@
-<title>The Seven</title>
+<title>The Seven Sweepstake</title>
 <style>
   :root { /* light values */
     --bg:#f6f4ef; --card:#ffffff; --ink:#1a1a1a; --muted:#6c6f65;
@@ -104,19 +104,19 @@ const DATA = {
     {id:"R16B", round:"Round of 16", date:"Sat 4 Jul", home:"FRA", away:"PAR", winner:"FRA", score:"1–0"},
     {id:"R16C", round:"Round of 16", date:"Sun 5 Jul", home:"BRA", away:"NOR", winner:"NOR", score:"1–2"},
     {id:"R16D", round:"Round of 16", date:"Sun 5 Jul", home:"MEX", away:"ENG", winner:"ENG", score:"2–3"},
-    {id:"R16E", round:"Round of 16", date:"Mon 6 Jul", home:"POR", away:"ESP", winner:null, score:null},
-    {id:"R16F", round:"Round of 16", date:"Mon 6 Jul", home:"USA", away:"BEL", winner:null, score:null},
-    {id:"R16G", round:"Round of 16", date:"Tue 7 Jul", home:"ARG", away:"EGY", winner:null, score:null},
-    {id:"R16H", round:"Round of 16", date:"Tue 7 Jul", home:"SUI", away:"COL", winner:null, score:null},
+    {id:"R16E", round:"Round of 16", date:"Mon 6 Jul", time:"8pm",  home:"POR", away:"ESP", winner:null, score:null},
+    {id:"R16F", round:"Round of 16", date:"Tue 7 Jul", time:"1am",  home:"USA", away:"BEL", winner:null, score:null},
+    {id:"R16G", round:"Round of 16", date:"Tue 7 Jul", time:"5pm",  home:"ARG", away:"EGY", winner:null, score:null},
+    {id:"R16H", round:"Round of 16", date:"Tue 7 Jul", time:"9pm",  home:"SUI", away:"COL", winner:null, score:null},
   ],
-  matches: [                     // winner: team id or null
-    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  from:["R16A","R16B"], home:null, away:null, winner:null},
-    {id:"QF2", round:"Quarter-final", date:"Fri 10 Jul", from:["R16C","R16D"], home:null, away:null, winner:null},
-    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", from:["R16E","R16F"], home:null, away:null, winner:null},
-    {id:"QF4", round:"Quarter-final", date:"Sat 11 Jul", from:["R16G","R16H"], home:null, away:null, winner:null},
-    {id:"SF1", round:"Semi-final",    date:"Tue 14 Jul", from:["QF1","QF2"], home:null, away:null, winner:null},
-    {id:"SF2", round:"Semi-final",    date:"Wed 15 Jul", from:["QF3","QF4"], home:null, away:null, winner:null},
-    {id:"F",   round:"Final",         date:"Sun 19 Jul", from:["SF1","SF2"], home:null, away:null, winner:null},
+  matches: [                     // winner: team id or null; dates/times are UK
+    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  from:["R16B","R16A"], home:null, away:null, winner:null},
+    {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", from:["R16C","R16D"], home:null, away:null, winner:null},
+    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  from:["R16F","R16E"], home:null, away:null, winner:null},
+    {id:"QF4", round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  from:["R16G","R16H"], home:null, away:null, winner:null},
+    {id:"SF1", round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF2"], home:null, away:null, winner:null},
+    {id:"SF2", round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF3","QF4"], home:null, away:null, winner:null},
+    {id:"F",   round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
   ],
 };
 
@@ -181,8 +181,8 @@ function render(){
 function renderHeader(app){
   const header = el("header","app-header");
   const titles = el("div");
-  titles.append(el("h1", null, "The Seven"));
-  titles.append(el("p", null, `World Cup 2026 sweepstake · winner takes £${pot()}`));
+  titles.append(el("h1", null, "The Seven Sweepstake"));
+  titles.append(el("p", null, `World Cup 2026 · winner takes £${pot()}`));
   header.append(titles);
   header.append(el("div","pot-pill", `£${pot()} pot`));
   app.append(header);
@@ -318,7 +318,7 @@ function renderMatchSide(match, sideKey){
 
 function renderMatchCard(match){
   const card = el("div","match-card");
-  const header = `${match.round} · ${match.date}` + (match.score ? ` · ${match.score}` : "");
+  const header = `${match.round} · ${match.date}` + (match.score ? ` · ${match.score}` : (match.time ? `, ${match.time}` : ""));
   card.append(el("div","match-header", header));
   card.append(renderMatchSide(match, "home"));
   card.append(renderMatchSide(match, "away"));
@@ -347,6 +347,7 @@ function buildBracket(matches){
 function renderRoad(app){
   const card = el("div","card");
   card.append(el("h2", null, "Road to the final"));
+  card.append(el("p","result-caption","Kick-off times are UK."));
   card.append(buildBracket([...DATA.r16, ...DATA.matches]));
   app.append(card);
 }
