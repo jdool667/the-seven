@@ -1,0 +1,436 @@
+<title>The Seven</title>
+<style>
+  :root { /* light values */
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1a1a1a; --muted:#6c6f65;
+    --accent:#0b6e4f; --gold:#a97c1c; --dead:#af4332; --line:#e4e1d7; --gold-ink:#1a1a1a;
+  }
+  @media (prefers-color-scheme: dark){ :root{
+    --bg:#141613; --card:#1e211b; --ink:#ececea; --muted:#989b8f;
+    --accent:#3fa07c; --gold:#d4ac52; --dead:#cf7362; --line:#33362c; --gold-ink:#1a1a1a;
+  }}
+  :root[data-theme="light"]{
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1a1a1a; --muted:#6c6f65;
+    --accent:#0b6e4f; --gold:#a97c1c; --dead:#af4332; --line:#e4e1d7; --gold-ink:#1a1a1a;
+  }
+  :root[data-theme="dark"]{
+    --bg:#141613; --card:#1e211b; --ink:#ececea; --muted:#989b8f;
+    --accent:#3fa07c; --gold:#d4ac52; --dead:#cf7362; --line:#33362c; --gold-ink:#1a1a1a;
+  }
+  body{ background:var(--bg); color:var(--ink); font:16px/1.5 system-ui; margin:0; font-variant-numeric:tabular-nums; }
+  body::before{ content:""; display:block; height:4px; background:linear-gradient(90deg, var(--accent), var(--gold)); }
+  main{ max-width:720px; margin:0 auto; padding:20px 16px 28px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px; margin-bottom:16px; }
+  header.app-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  header.app-header h1{ margin:0; font-size:1.5rem; font-weight:800; letter-spacing:-0.01em; }
+  header.app-header p{ margin:4px 0 0; color:var(--muted); font-size:0.9rem; }
+  .pot-pill{ background:var(--gold); color:var(--gold-ink); font-weight:600; letter-spacing:0.01em; border-radius:999px; padding:6px 14px; white-space:nowrap; }
+  .card h2{ display:inline-block; margin:0 0 14px; padding-bottom:6px; border-bottom:2px solid var(--accent); font-size:1.05rem; font-weight:700; letter-spacing:-0.01em; }
+  .rules-list{ margin:0; padding-left:1.2em; }
+  .rules-list li{ margin-bottom:4px; }
+  .rules-list li::marker{ color:var(--accent); }
+  .player-row{ display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid var(--line); }
+  .player-row .status.paid{ color:var(--accent); }
+  .player-row .status.owes{ color:var(--dead); }
+  .pot-footer{ margin-top:10px; padding-top:10px; color:var(--muted); font-weight:600; }
+  .draw-btn{ display:block; width:100%; font-size:1.3rem; font-weight:700; letter-spacing:0.01em; padding:16px; border:none; border-radius:10px; background:var(--accent); color:var(--card); cursor:pointer; }
+  .draw-btn:hover{ opacity:0.9; }
+  .draw-btn:disabled{ opacity:0.6; cursor:default; }
+  .reveal-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--line); font-size:1.1rem; }
+  .reveal-row:last-of-type{ border-bottom:none; }
+  .reveal-flag{ font-size:1.6rem; }
+  .reveal-row.locked .reveal-flag{ animation:scale-up 0.35s ease; }
+  @keyframes scale-up{ 0%{ transform:scale(0.4); opacity:0.3; } 60%{ transform:scale(1.25); opacity:1; } 100%{ transform:scale(1); opacity:1; } }
+  .result-textarea{ width:100%; box-sizing:border-box; margin-top:12px; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--ink); font-family:inherit; font-size:0.95rem; resize:vertical; min-height:60px; }
+  .result-caption{ margin:6px 0 0; color:var(--muted); font-size:0.9rem; }
+  .bracket-wrap{ overflow-x:auto; margin-bottom:16px; }
+  .bracket{ display:flex; gap:16px; padding-bottom:4px; }
+  .bracket-col{ display:flex; flex-direction:column; gap:12px; justify-content:space-around; min-width:210px; }
+  .match-card{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+  .match-header{ color:var(--muted); font-size:0.72rem; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; margin-bottom:8px; }
+  .match-side{ display:flex; align-items:center; gap:8px; padding:4px 6px; border-left:3px solid transparent; border-radius:4px; }
+  .match-side .flag{ font-size:1.2rem; }
+  .match-side .team-name{ flex:1; }
+  .match-side .owner{ color:var(--muted); font-size:0.85rem; }
+  .match-side.winner{ border-left-color:var(--accent); }
+  .match-side.loser{ color:var(--dead); text-decoration:line-through; }
+  .match-side.loser .owner{ color:var(--dead); }
+  .match-side.pending{ color:var(--muted); font-style:italic; }
+  .champion-card{ border:2px solid var(--gold); text-align:center; font-weight:700; font-size:1.1rem; }
+  .celebration-banner{ text-align:center; border:2px solid var(--gold); }
+  .celebration-banner .trophy{ display:block; font-size:2.5rem; margin-bottom:8px; }
+  .celebration-banner .winner-name{ font-size:1.3rem; font-weight:700; }
+  .celebration-banner .refund-line{ margin-top:6px; color:var(--muted); }
+  .status-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+  .status-card{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px; text-align:center; }
+  .status-card .status-owner{ margin-bottom:4px; font-weight:700; font-size:1.05rem; }
+  .status-card .status-team{ margin-bottom:8px; color:var(--muted); font-size:0.9rem; }
+  .status-card .status-team .flag{ margin-right:4px; font-size:1.2rem; }
+  .status-card .status-line{ color:var(--accent); font-weight:600; }
+  .status-card .spoon-badge{ margin-top:6px; color:var(--dead); font-size:0.8rem; }
+  .status-card.eliminated{ opacity:0.6; }
+  .status-card.eliminated .status-line{ color:var(--dead); }
+  .status-card.champion{ border:2px solid var(--gold); }
+  .status-card.champion .status-line{ color:var(--gold); }
+</style>
+<main id="app"></main>
+<script>
+const TEAMS = {                  // every side still alive at the R16 stage
+  MAR:{name:"Morocco", flag:"🇲🇦"},       CAN:{name:"Canada", flag:"🇨🇦"},
+  FRA:{name:"France", flag:"🇫🇷"},        PAR:{name:"Paraguay", flag:"🇵🇾"},
+  BRA:{name:"Brazil", flag:"🇧🇷"},        NOR:{name:"Norway", flag:"🇳🇴"},
+  MEX:{name:"Mexico", flag:"🇲🇽"},        ENG:{name:"England", flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿"},
+  POR:{name:"Portugal", flag:"🇵🇹"},      ESP:{name:"Spain", flag:"🇪🇸"},
+  USA:{name:"United States", flag:"🇺🇸"}, BEL:{name:"Belgium", flag:"🇧🇪"},
+  ARG:{name:"Argentina", flag:"🇦🇷"},     EGY:{name:"Egypt", flag:"🇪🇬"},
+  SUI:{name:"Switzerland", flag:"🇨🇭"},   COL:{name:"Colombia", flag:"🇨🇴"},
+};
+
+const DATA = {
+  phase: "pre-draw",            // "pre-draw" | "drawn"
+  stake: 20,
+  players: [                     // team: team id string once drawn
+    {name:"Darley", paid:false, team:null},
+    {name:"Dom",    paid:false, team:null},
+    {name:"Todd",   paid:false, team:null},
+    {name:"Perez",  paid:false, team:null},
+    {name:"Ethan",  paid:false, team:null},
+    {name:"Will",   paid:false, team:null},
+    {name:"Bell",   paid:false, team:null},
+  ],
+  houseTeam: null,               // team id owned by "The House" (only if England out)
+  teams: [],                     // draw pool, filled when QF lineup known: team ids like "NOR" (England never enters)
+  r16: [                         // context only — feeds the road-to-the-final view, never the draw
+    {id:"R16A", round:"Round of 16", date:"Sat 4 Jul", home:"MAR", away:"CAN", winner:"MAR", score:"3–0"},
+    {id:"R16B", round:"Round of 16", date:"Sat 4 Jul", home:"FRA", away:"PAR", winner:"FRA", score:"1–0"},
+    {id:"R16C", round:"Round of 16", date:"Sun 5 Jul", home:"BRA", away:"NOR", winner:"NOR", score:"1–2"},
+    {id:"R16D", round:"Round of 16", date:"Sun 5 Jul", home:"MEX", away:"ENG", winner:"ENG", score:"2–3"},
+    {id:"R16E", round:"Round of 16", date:"Mon 6 Jul", home:"POR", away:"ESP", winner:null, score:null},
+    {id:"R16F", round:"Round of 16", date:"Mon 6 Jul", home:"USA", away:"BEL", winner:null, score:null},
+    {id:"R16G", round:"Round of 16", date:"Tue 7 Jul", home:"ARG", away:"EGY", winner:null, score:null},
+    {id:"R16H", round:"Round of 16", date:"Tue 7 Jul", home:"SUI", away:"COL", winner:null, score:null},
+  ],
+  matches: [                     // winner: team id or null
+    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  from:["R16A","R16B"], home:null, away:null, winner:null},
+    {id:"QF2", round:"Quarter-final", date:"Fri 10 Jul", from:["R16C","R16D"], home:null, away:null, winner:null},
+    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", from:["R16E","R16F"], home:null, away:null, winner:null},
+    {id:"QF4", round:"Quarter-final", date:"Sat 11 Jul", from:["R16G","R16H"], home:null, away:null, winner:null},
+    {id:"SF1", round:"Semi-final",    date:"Tue 14 Jul", from:["QF1","QF2"], home:null, away:null, winner:null},
+    {id:"SF2", round:"Semi-final",    date:"Wed 15 Jul", from:["QF3","QF4"], home:null, away:null, winner:null},
+    {id:"F",   round:"Final",         date:"Sun 19 Jul", from:["SF1","SF2"], home:null, away:null, winner:null},
+  ],
+};
+
+const pot = () => DATA.stake * DATA.players.length;
+const team = id => TEAMS[id] ? {id, ...TEAMS[id]} : null;
+const ownerOf = id => DATA.players.find(p => p.team === id) || (DATA.houseTeam === id ? {name:"The House"} : null);
+const champion = () => DATA.matches.find(m => m.id === "F").winner;
+const isEliminated = id => DATA.matches.some(m => m.winner && (m.home === id || m.away === id) && m.winner !== id);
+const matchById = id => DATA.r16.find(m => m.id === id) || DATA.matches.find(m => m.id === id);
+function sideTeamId(match, sideKey){   // team occupying a side, following a decided feeder tie
+  if (match[sideKey]) return match[sideKey];
+  const fromId = match.from ? match.from[sideKey === "home" ? 0 : 1] : null;
+  const src = fromId ? matchById(fromId) : null;
+  return src && src.winner ? src.winner : null;
+}
+
+function championCopy(){
+  const champ = champion();
+  if (!champ) return null;
+  const t = team(champ);
+  const owner = ownerOf(champ);
+  const isHouse = !!owner && owner.name === "The House";
+  const ownerName = owner ? owner.name : "Unclaimed";
+  const houseLine = `House win — everyone gets £${DATA.stake} back`;
+  return {
+    champ, t, owner, isHouse, ownerName,
+    cardLine: isHouse ? houseLine : `🏆 ${t ? t.name : champ} — ${ownerName} takes £${pot()}`,
+    bannerLine: isHouse ? houseLine : `takes the £${pot()} pot`,
+  };
+}
+
+function el(tag, cls, text){
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function shuffle(a){
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function runDraw(){
+  const teams = shuffle(DATA.teams);
+  const names = shuffle(DATA.players.map(p => p.name));
+  const result = names.map((player, i) => ({player, teamId: teams[i]}));
+  if (teams.length === 8) result.push({player: "The House", teamId: teams[7]});
+  return result;
+}
+
+function render(){
+  const app = document.getElementById("app");
+  app.replaceChildren();
+  if (DATA.phase === "pre-draw" && DATA.teams.length >= 7) renderDraw(app);
+  else if (DATA.phase === "pre-draw") renderPreDraw(app);
+  else renderDrawn(app);
+}
+function renderHeader(app){
+  const header = el("header","app-header");
+  const titles = el("div");
+  titles.append(el("h1", null, "The Seven"));
+  titles.append(el("p", null, `World Cup 2026 sweepstake · winner takes £${pot()}`));
+  header.append(titles);
+  header.append(el("div","pot-pill", `£${pot()} pot`));
+  app.append(header);
+}
+
+function renderPotCard(app){
+  const card = el("div","card");
+  card.append(el("h2", null, "Pot tracker"));
+  DATA.players.forEach(p => {
+    const row = el("div","player-row");
+    row.append(el("span", null, p.name));
+    if (p.paid) row.append(el("span","status paid","✅ Paid"));
+    else row.append(el("span","status owes", `⭕ Owes £${DATA.stake}`));
+    card.append(row);
+  });
+  const collected = DATA.players.filter(p => p.paid).length * DATA.stake;
+  card.append(el("div","pot-footer", `£${collected} of £${pot()} collected`));
+  app.append(card);
+}
+
+function renderPreDraw(app){
+  renderHeader(app);
+
+  const banner = el("div","card");
+  banner.append(el("p", null, "Last Round of 16 ties wrap Tue 7 Jul — the draw goes live as soon as all seven teams are known."));
+  app.append(banner);
+
+  renderRoad(app);
+
+  const rules = el("div","card");
+  rules.append(el("h2", null, "The rules"));
+  const list = el("ul","rules-list");
+  [
+    `£${DATA.stake} in each`,
+    "random team draw, one team per person",
+    "England excluded",
+    `winner takes the £${pot()} pot`,
+    "if England go out and a spare team exists, The House takes it — House win = everyone refunded",
+  ].forEach(text => list.append(el("li", null, text)));
+  rules.append(list);
+  app.append(rules);
+
+  renderPotCard(app);
+}
+function renderDraw(app){
+  renderHeader(app);
+
+  const card = el("div","card");
+  card.append(el("h2", null, "The draw"));
+  const btn = el("button","draw-btn","🎲 Run the draw");
+  card.append(btn);
+  app.append(card);
+
+  const SLOT_MS = 2500;
+  const SHUFFLE_MS = 80;
+
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.remove();
+
+    const result = runDraw();
+    const flags = DATA.teams.map(id => team(id).flag);
+
+    function revealOne(entry){
+      const row = el("div","reveal-row");
+      const nameEl = el("span","reveal-name", entry.player);
+      const flagEl = el("span","reveal-flag", "🏳️");
+      row.append(nameEl);
+      row.append(flagEl);
+      card.append(row);
+
+      let tick = 0;
+      const totalTicks = Math.round((SLOT_MS * 0.7) / SHUFFLE_MS);
+      const iv = setInterval(() => {
+        flagEl.textContent = flags[Math.floor(Math.random() * flags.length)];
+        tick++;
+        if (tick >= totalTicks){
+          clearInterval(iv);
+          const t = team(entry.teamId);
+          flagEl.textContent = t ? t.flag : "🏳️";
+          nameEl.textContent = `${entry.player} → ${t ? t.name : entry.teamId}`;
+          row.classList.add("locked");
+        }
+      }, SHUFFLE_MS);
+    }
+
+    function showResultLine(){
+      const line = result.map(r => `${r.player}=${r.teamId}`).join(", ");
+      const ta = el("textarea","result-textarea");
+      ta.readOnly = true;
+      ta.value = line;
+      card.append(ta);
+      card.append(el("p","result-caption","Send this line to Claude to lock the draw in for everyone."));
+    }
+
+    result.forEach((entry, i) => {
+      setTimeout(() => revealOne(entry), i * SLOT_MS);
+    });
+    setTimeout(showResultLine, result.length * SLOT_MS);
+  });
+}
+
+function renderMatchSide(match, sideKey){
+  const id = sideTeamId(match, sideKey);
+  const row = el("div","match-side");
+  if (id){
+    const t = team(id);
+    const owner = ownerOf(id);
+    row.append(el("span","flag", t ? t.flag : "🏳️"));
+    row.append(el("span","team-name", t ? t.name : id));
+    if (owner) row.append(el("span","owner", owner.name));
+    else if (id === "ENG") row.append(el("span","owner","excluded"));
+    if (match.winner){
+      row.classList.add(match.winner === id ? "winner" : "loser");
+    }
+  } else {
+    row.classList.add("pending");
+    const idx = sideKey === "home" ? 0 : 1;
+    const fromId = match.from ? match.from[idx] : null;
+    const src = fromId ? matchById(fromId) : null;
+    const a = src ? team(sideTeamId(src, "home")) : null;
+    const b = src ? team(sideTeamId(src, "away")) : null;
+    if (a && b){
+      row.append(el("span","flag", `${a.flag}${b.flag}`));
+      row.append(el("span","team-name", `${a.name} / ${b.name}`));
+    } else {
+      row.append(el("span","team-name", fromId ? `Winner ${fromId}` : "TBD"));
+    }
+  }
+  return row;
+}
+
+function renderMatchCard(match){
+  const card = el("div","match-card");
+  const header = `${match.round} · ${match.date}` + (match.score ? ` · ${match.score}` : "");
+  card.append(el("div","match-header", header));
+  card.append(renderMatchSide(match, "home"));
+  card.append(renderMatchSide(match, "away"));
+  return card;
+}
+
+function buildBracket(matches){
+  const wrap = el("div","bracket-wrap");
+  const bracket = el("div","bracket");
+  wrap.append(bracket);
+
+  const cols = [];
+  matches.forEach(m => {
+    let col = cols.find(c => c.round === m.round);
+    if (!col){ col = {round: m.round, matches: []}; cols.push(col); }
+    col.matches.push(m);
+  });
+  cols.forEach(c => {
+    const colEl = el("div","bracket-col");
+    c.matches.forEach(m => colEl.append(renderMatchCard(m)));
+    bracket.append(colEl);
+  });
+  return wrap;
+}
+
+function renderRoad(app){
+  const card = el("div","card");
+  card.append(el("h2", null, "Road to the final"));
+  card.append(buildBracket([...DATA.r16, ...DATA.matches]));
+  app.append(card);
+}
+
+function renderBracket(app){
+  app.append(buildBracket(DATA.matches));
+
+  const champCopy = championCopy();
+  if (champCopy){
+    const card = el("div","card champion-card");
+    card.append(el("p", null, champCopy.cardLine));
+    app.append(card);
+  }
+}
+
+function renderStatusBoard(app){
+  const champ = champion();
+  const champCopy = championCopy();
+
+  if (champCopy){
+    const banner = el("div","card celebration-banner");
+    banner.append(el("span","trophy","🏆"));
+    banner.append(el("div","winner-name", champCopy.ownerName));
+    banner.append(el("div","refund-line", champCopy.bannerLine));
+    app.append(banner);
+  }
+
+  const owners = DATA.players.slice();
+  if (DATA.houseTeam) owners.push({name:"The House", team: DATA.houseTeam});
+
+  let firstOutTeam = null;
+  for (const m of DATA.matches){
+    if (m.winner){
+      const loserId = m.winner === m.home ? m.away : (m.winner === m.away ? m.home : null);
+      if (loserId && ownerOf(loserId)){
+        firstOutTeam = loserId;
+        break;
+      }
+    }
+  }
+
+  const card = el("div","card status-board");
+  card.append(el("h2", null, "Squad status"));
+  const grid = el("div","status-grid");
+
+  const ranked = owners.map(owner => {
+    const eliminated = isEliminated(owner.team);
+    const isChamp = !!champ && champ === owner.team;
+    const rank = isChamp ? 0 : (eliminated ? 2 : 1);
+    return {owner, eliminated, isChamp, rank};
+  });
+  ranked.sort((a, b) => a.rank - b.rank);
+
+  ranked.forEach(({owner, eliminated, isChamp}) => {
+    const t = team(owner.team);
+    const cls = "status-card" + (isChamp ? " champion" : (eliminated ? " eliminated" : ""));
+    const c = el("div", cls);
+    c.append(el("div","status-owner", owner.name));
+    const teamLine = el("div","status-team");
+    teamLine.append(el("span","flag", t ? t.flag : "🏳️"));
+    teamLine.append(el("span", null, t ? t.name : owner.team));
+    c.append(teamLine);
+    if (isChamp){
+      c.append(el("div","status-line", `🏆 CHAMPION — £${pot()}`));
+    } else if (eliminated){
+      c.append(el("div","status-line", "Out ✂️"));
+    } else {
+      c.append(el("div","status-line", `In it for £${pot()}`));
+    }
+    if (eliminated && owner.team === firstOutTeam){
+      c.append(el("div","spoon-badge","First out 🥄"));
+    }
+    grid.append(c);
+  });
+
+  card.append(grid);
+  app.append(card);
+}
+
+function renderDrawn(app){
+  renderHeader(app);
+  renderStatusBoard(app);
+  renderBracket(app);
+  renderPotCard(app);
+}
+render();
+</script>
