@@ -112,22 +112,22 @@ const DATA = {
     {name:"Bell",   paid:false, team:null},
   ],
   houseTeam: null,               // team id owned by "The House" (only if England out)
-  teams: [],                     // draw pool, filled when QF lineup known: team ids like "NOR" (England never enters)
+  teams: ["MAR","FRA","NOR","ESP","BEL","ARG","SUI"],  // draw pool: the 7 non-England QF teams
   r16: [                         // context only — feeds the road-to-the-final view, never the draw
     {id:"R16A", round:"Round of 16", date:"Sat 4 Jul", home:"MAR", away:"CAN", winner:"MAR", score:"3–0"},
     {id:"R16B", round:"Round of 16", date:"Sat 4 Jul", home:"FRA", away:"PAR", winner:"FRA", score:"1–0"},
     {id:"R16C", round:"Round of 16", date:"Sun 5 Jul", home:"BRA", away:"NOR", winner:"NOR", score:"1–2"},
     {id:"R16D", round:"Round of 16", date:"Sun 5 Jul", home:"MEX", away:"ENG", winner:"ENG", score:"2–3"},
-    {id:"R16E", round:"Round of 16", date:"Mon 6 Jul", time:"8pm",  home:"POR", away:"ESP", winner:null, score:null},
-    {id:"R16F", round:"Round of 16", date:"Tue 7 Jul", time:"1am",  home:"USA", away:"BEL", winner:null, score:null},
-    {id:"R16G", round:"Round of 16", date:"Tue 7 Jul", time:"5pm",  home:"ARG", away:"EGY", winner:null, score:null},
-    {id:"R16H", round:"Round of 16", date:"Tue 7 Jul", time:"9pm",  home:"SUI", away:"COL", winner:null, score:null},
+    {id:"R16E", round:"Round of 16", date:"Mon 6 Jul", home:"POR", away:"ESP", winner:"ESP", score:"0–1"},
+    {id:"R16F", round:"Round of 16", date:"Tue 7 Jul", home:"USA", away:"BEL", winner:"BEL", score:"1–4"},
+    {id:"R16G", round:"Round of 16", date:"Tue 7 Jul", home:"ARG", away:"EGY", winner:"ARG", score:"3–2"},
+    {id:"R16H", round:"Round of 16", date:"Tue 7 Jul", home:"SUI", away:"COL", winner:"SUI", score:"0–0 (4–3p)"},
   ],
   matches: [                     // winner: team id or null; dates/times are UK
-    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  from:["R16B","R16A"], home:null, away:null, winner:null},
-    {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", from:["R16C","R16D"], home:null, away:null, winner:null},
-    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  from:["R16F","R16E"], home:null, away:null, winner:null},
-    {id:"QF4", round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  from:["R16G","R16H"], home:null, away:null, winner:null},
+    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  from:["R16B","R16A"], home:"FRA", away:"MAR", winner:null},
+    {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", from:["R16C","R16D"], home:"NOR", away:"ENG", winner:null},
+    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  from:["R16F","R16E"], home:"BEL", away:"ESP", winner:null},
+    {id:"QF4", round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  from:["R16G","R16H"], home:"ARG", away:"SUI", winner:null},
     {id:"SF1", round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF2"], home:null, away:null, winner:null},
     {id:"SF2", round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF3","QF4"], home:null, away:null, winner:null},
     {id:"F",   round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
@@ -249,6 +249,8 @@ function renderDraw(app){
   const btn = el("button","draw-btn","🎲 Run the draw");
   card.append(btn);
   app.append(card);
+  renderRoad(app);
+  renderPotCard(app);
 
   const SLOT_MS = 2500;
   const SHUFFLE_MS = 80;
