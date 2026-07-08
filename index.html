@@ -62,6 +62,7 @@
   .match-side.loser{ color:var(--dead); text-decoration:line-through; }
   .match-side.loser .owner{ color:var(--dead); }
   .match-side.pending{ color:var(--muted); font-style:italic; }
+  .match-odds{ color:var(--gold); font-size:0.85rem; font-weight:600; }
   .champion-card{ border:2px solid var(--gold); text-align:center; font-weight:700; font-size:1.1rem; }
   .celebration-banner{ text-align:center; border:2px solid var(--gold); }
   .celebration-banner .trophy{ display:block; font-size:2.5rem; margin-bottom:8px; }
@@ -116,10 +117,16 @@ const DATA = {
   ],
   houseTeam: null,               // team id owned by "The House" (only if England out)
   teams: ["MAR","FRA","NOR","ESP","BEL","ARG","SUI"],  // draw pool: the 7 non-England QF teams
-  odds: {                        // outright winner, fractional — refresh at each redeploy, drop eliminated teams
-    FRA:"15/8", ESP:"7/2", ARG:"4/1", ENG:"5/1", NOR:"16/1", MAR:"33/1", BEL:"50/1", SUI:"80/1",
+  odds: {                        // outright winner, decimal — fallback when odds.json can't be fetched
+    FRA:"3.05", ESP:"5.2", ARG:"5.3", ENG:"6", NOR:"17", MAR:"34", BEL:"38", SUI:"42",
   },
-  oddsUpdated: "8 Jul",
+  h2h: [                         // per-match win odds — fallback, same deal
+    {home:"FRA", away:"MAR", prices:{FRA:"1.57", MAR:"6.25", draw:"3.9"}},
+    {home:"ESP", away:"BEL", prices:{BEL:"5.5", ESP:"1.61", draw:"3.9"}},
+    {home:"NOR", away:"ENG", prices:{ENG:"1.84", NOR:"4.1", draw:"3.7"}},
+    {home:"ARG", away:"SUI", prices:{ARG:"1.7", SUI:"5.5", draw:"3.5"}},
+  ],
+  oddsUpdated: "8 Jul, 11:54am",
   matches: [                     // winner: team id or null; dates/times are UK
     {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  home:"FRA", away:"MAR", winner:null},
     {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
@@ -137,6 +144,12 @@ const ownerOf = id => DATA.players.find(p => p.team === id) || (DATA.houseTeam =
 const champion = () => DATA.matches.find(m => m.id === "F").winner;
 const isEliminated = id => DATA.matches.some(m => m.winner && (m.home === id || m.away === id) && m.winner !== id);
 const matchById = id => DATA.matches.find(m => m.id === id);
+function h2hPrice(match, id){   // this team's win price for this fixture, if the market is up
+  const entry = (DATA.h2h || []).find(e =>
+    (e.home === match.home && e.away === match.away) ||
+    (e.home === match.away && e.away === match.home));
+  return entry ? entry.prices[id] || null : null;
+}
 function sideTeamId(match, sideKey){   // team occupying a side, following a decided feeder tie
   if (match[sideKey]) return match[sideKey];
   const fromId = match.from ? match.from[sideKey === "home" ? 0 : 1] : null;
@@ -218,10 +231,7 @@ function renderOddsCard(app){
   if (champion()) return;
   const entries = Object.entries(DATA.odds)
     .filter(([id]) => !isEliminated(id))
-    .map(([id, price]) => {
-      const [n, d] = price.split("/").map(Number);
-      return {id, price, value: n / d};
-    })
+    .map(([id, price]) => ({id, price, value: parseFloat(price)}))
     .sort((a, b) => a.value - b.value);
   if (!entries.length) return;
 
@@ -342,6 +352,9 @@ function renderMatchSide(match, sideKey){
     else if (id === "ENG") row.append(el("span","owner","excluded"));
     if (match.winner){
       row.classList.add(match.winner === id ? "winner" : "loser");
+    } else {
+      const price = h2hPrice(match, id);
+      if (price) row.append(el("span","match-odds", price));
     }
   } else {
     row.classList.add("pending");
@@ -488,6 +501,7 @@ fetch("odds.json", {cache: "no-store"})
     if (live && live.odds && Object.keys(live.odds).length){
       DATA.odds = live.odds;
       DATA.oddsUpdated = live.updated;
+      if (live.h2h) DATA.h2h = live.h2h;
     }
     render();
   });
