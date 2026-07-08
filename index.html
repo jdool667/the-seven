@@ -127,14 +127,14 @@ const DATA = {
     {home:"ARG", away:"SUI", prices:{ARG:"1.7", SUI:"5.5", draw:"3.5"}},
   ],
   oddsUpdated: "8 Jul, 11:54am",
-  matches: [                     // winner: team id or null; dates/times are UK
-    {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  home:"FRA", away:"MAR", winner:null},
-    {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
-    {id:"QF3", round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  home:"BEL", away:"ESP", winner:null},
-    {id:"QF4", round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  home:"ARG", away:"SUI", winner:null},
-    {id:"SF1", round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF2"], home:null, away:null, winner:null},
-    {id:"SF2", round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF3","QF4"], home:null, away:null, winner:null},
-    {id:"F",   round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
+  matches: [                     // winner: team id or null; dates/times are UK; seq = true kickoff order (first-out spoon)
+    {id:"QF1", seq:1, round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  home:"FRA", away:"MAR", winner:null},
+    {id:"QF2", seq:3, round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
+    {id:"QF3", seq:2, round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  home:"BEL", away:"ESP", winner:null},
+    {id:"QF4", seq:4, round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  home:"ARG", away:"SUI", winner:null},
+    {id:"SF1", seq:5, round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF2"], home:null, away:null, winner:null},
+    {id:"SF2", seq:6, round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF3","QF4"], home:null, away:null, winner:null},
+    {id:"F",   seq:7, round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
   ],
 };
 
@@ -436,7 +436,7 @@ function renderStatusBoard(app){
   if (DATA.houseTeam) owners.push({name:"The House", team: DATA.houseTeam});
 
   let firstOutTeam = null;
-  for (const m of DATA.matches){
+  for (const m of [...DATA.matches].sort((a, b) => a.seq - b.seq)){
     if (m.winner){
       const loserId = m.winner === m.home ? m.away : (m.winner === m.away ? m.home : null);
       if (loserId && ownerOf(loserId)){
@@ -492,17 +492,33 @@ function renderDrawn(app){
   renderPotCard(app);
 }
 
-// Live odds: GitHub Pages serves odds.json (refreshed by a scheduled Action);
-// the Claude Artifact blocks fetch, so the baked DATA.odds is the fallback.
-fetch("odds.json", {cache: "no-store"})
-  .then(r => (r.ok ? r.json() : null))
-  .catch(() => null)
-  .then(live => {
-    if (live && live.odds && Object.keys(live.odds).length){
-      DATA.odds = live.odds;
-      DATA.oddsUpdated = live.updated;
-      if (live.h2h) DATA.h2h = live.h2h;
-    }
-    render();
-  });
+// merge fetched results into the bracket: fill sides from feeder winners,
+// then match each undecided fixture against results by team pair
+function applyResults(results){
+  for (const m of DATA.matches){
+    if (!m.home) m.home = sideTeamId(m, "home");
+    if (!m.away) m.away = sideTeamId(m, "away");
+    if (!m.home || !m.away || m.winner) continue;
+    const r = results.find(r =>
+      (r.home === m.home && r.away === m.away) ||
+      (r.home === m.away && r.away === m.home));
+    if (!r) continue;
+    m.winner = r.winner;
+    const [hs, as] = r.home === m.home ? [r.hs, r.as] : [r.as, r.hs];
+    m.score = `${hs}–${as}` + (r.pens ? " (pens)" : "");
+  }
+}
+
+// Live data: GitHub Pages serves odds.json and results.json (refreshed by a
+// scheduled Action); the Claude Artifact blocks fetch, so baked DATA is the fallback.
+const load = url => fetch(url, {cache: "no-store"}).then(r => (r.ok ? r.json() : null)).catch(() => null);
+Promise.all([load("odds.json"), load("results.json")]).then(([liveOdds, liveResults]) => {
+  if (liveOdds && liveOdds.odds && Object.keys(liveOdds.odds).length){
+    DATA.odds = liveOdds.odds;
+    DATA.oddsUpdated = liveOdds.updated;
+    if (liveOdds.h2h) DATA.h2h = liveOdds.h2h;
+  }
+  applyResults((liveResults && liveResults.results) || []);
+  render();
+});
 </script>
