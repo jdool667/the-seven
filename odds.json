@@ -1,5 +1,5 @@
 {
-  "updated": "8 Jul, 11:54am",
+  "updated": "8 Jul, 2:21pm",
   "odds": {
     "FRA": "3.05",
     "ESP": "5.2",
@@ -15,8 +15,8 @@
       "home": "FRA",
       "away": "MAR",
       "prices": {
-        "FRA": "1.57",
-        "MAR": "6.25",
+        "FRA": "1.55",
+        "MAR": "6.5",
         "draw": "3.9"
       }
     },
@@ -43,7 +43,7 @@
       "away": "SUI",
       "prices": {
         "ARG": "1.7",
-        "SUI": "5.5",
+        "SUI": "5.4",
         "draw": "3.5"
       }
     }
