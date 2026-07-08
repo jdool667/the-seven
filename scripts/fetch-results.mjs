@@ -1,0 +1,50 @@
+// Fetches completed World Cup match results from The Odds API and writes results.json.
+// A level final score means penalties — the winner is inferred from which team
+// appears in a later fixture. Runs in GitHub Actions; needs ODDS_API_KEY.
+import { writeFileSync } from "node:fs";
+
+const KEY = process.env.ODDS_API_KEY;
+if (!KEY) { console.error("ODDS_API_KEY not set"); process.exit(1); }
+
+const IDS = {
+  France: "FRA", Spain: "ESP", Argentina: "ARG", England: "ENG",
+  Norway: "NOR", Morocco: "MAR", Belgium: "BEL", Switzerland: "SUI",
+};
+
+async function get(path) {
+  const res = await fetch(`https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/${path}`);
+  if (!res.ok) { console.error(`Odds API ${res.status}: ${await res.text()}`); process.exit(1); }
+  return res.json();
+}
+
+const scores = await get(`scores/?apiKey=${KEY}&daysFrom=3`);
+const fixtures = await get(`events/?apiKey=${KEY}`);   // upcoming fixtures; free endpoint
+
+const results = [];
+for (const m of scores) {
+  if (!m.completed || !m.scores) continue;
+  const home = IDS[m.home_team], away = IDS[m.away_team];
+  if (!home || !away) continue;
+  const hs = +m.scores.find(s => s.name === m.home_team)?.score;
+  const as = +m.scores.find(s => s.name === m.away_team)?.score;
+  if (!Number.isFinite(hs) || !Number.isFinite(as)) continue;
+
+  let winner = hs > as ? home : as > hs ? away : null;
+  const pens = !winner;
+  if (pens) {
+    // knockout draw → decided on penalties; the winner shows up in a later fixture
+    const later = fixtures.filter(e => new Date(e.commence_time) > new Date(m.commence_time));
+    const advanced = id => later.some(e => IDS[e.home_team] === id || IDS[e.away_team] === id);
+    if (advanced(home) && !advanced(away)) winner = home;
+    else if (advanced(away) && !advanced(home)) winner = away;
+  }
+  if (winner) results.push({ home, away, hs, as, winner, pens });
+  else console.log(`skipping ${home}–${away}: level score, winner not yet inferable`);
+}
+
+const updated = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
+}).format(new Date()).replace(" am", "am").replace(" pm", "pm");
+
+writeFileSync(new URL("../results.json", import.meta.url), JSON.stringify({ updated, results }, null, 2) + "\n");
+console.log("wrote results.json:", JSON.stringify(results));
