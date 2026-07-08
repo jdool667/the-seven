@@ -34,17 +34,19 @@ function median(xs) {
   return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
 }
 
-// nearest tidy fraction for a decimal price (bookmaker style: 2.875 → 15/8)
+// snap a decimal price to the nearest rung of the standard bookmaker ladder
+const LADDER = [
+  "1/5","1/4","2/7","3/10","1/3","2/5","4/9","1/2","8/15","4/7","3/5","8/13","4/6","4/5","5/6",
+  "1/1","11/10","6/5","5/4","11/8","6/4","13/8","7/4","15/8","2/1","9/4","5/2","11/4","3/1",
+  "10/3","7/2","4/1","9/2","5/1","11/2","6/1","13/2","7/1","15/2","8/1","9/1","10/1","11/1",
+  "12/1","14/1","16/1","18/1","20/1","25/1","33/1","40/1","50/1","66/1","80/1","100/1","150/1","250/1",
+].map(f => { const [n, d] = f.split("/").map(Number); return { f, v: n / d }; });
+
 function toFraction(dec) {
   const v = dec - 1;
-  let best = null;
-  for (let d = 1; d <= 20; d++) {
-    const n = Math.round(v * d);
-    if (n < 1) continue;
-    const err = Math.abs(n / d - v);
-    if (!best || err < best.err - 1e-9) best = { n, d, err };
-  }
-  return best ? `${best.n}/${best.d}` : `${Math.max(1, Math.round(v))}/1`;
+  let best = LADDER[0];
+  for (const rung of LADDER) if (Math.abs(rung.v - v) < Math.abs(best.v - v)) best = rung;
+  return best.f;
 }
 
 const odds = {};
