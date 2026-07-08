@@ -391,7 +391,7 @@ function buildBracket(matches){
 function renderRoad(app){
   const card = el("div","card");
   card.append(el("h2", null, "Road to the final"));
-  card.append(el("p","result-caption","Kick-off times are UK · swipe across for the later rounds →"));
+  card.append(el("p","result-caption","Kick-off times are UK."));
   card.append(buildBracket(DATA.matches));
   app.append(card);
 }
