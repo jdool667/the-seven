@@ -104,16 +104,16 @@ const TEAMS = {                  // every side still alive at the R16 stage
 };
 
 const DATA = {
-  phase: "pre-draw",            // "pre-draw" | "drawn"
+  phase: "drawn",               // "pre-draw" | "drawn"
   stake: 20,
-  players: [                     // team: team id string once drawn
-    {name:"Darley", paid:false, team:null},
-    {name:"Dom",    paid:false, team:null},
-    {name:"Todd",   paid:false, team:null},
-    {name:"Perez",  paid:false, team:null},
-    {name:"Ethan",  paid:false, team:null},
-    {name:"Will",   paid:false, team:null},
-    {name:"Bell",   paid:false, team:null},
+  players: [                     // drawn 8 Jul 2026
+    {name:"Darley", paid:false, team:"BEL"},
+    {name:"Dom",    paid:false, team:"MAR"},
+    {name:"Todd",   paid:false, team:"NOR"},
+    {name:"Perez",  paid:false, team:"SUI"},
+    {name:"Ethan",  paid:false, team:"ARG"},
+    {name:"Will",   paid:false, team:"ESP"},
+    {name:"Bell",   paid:false, team:"FRA"},
   ],
   houseTeam: null,               // team id owned by "The House" (only if England out)
   teams: ["MAR","FRA","NOR","ESP","BEL","ARG","SUI"],  // draw pool: the 7 non-England QF teams
@@ -132,8 +132,8 @@ const DATA = {
     {id:"QF2", seq:3, round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
     {id:"QF3", seq:2, round:"Quarter-final", date:"Fri 10 Jul", time:"8pm",  home:"BEL", away:"ESP", winner:null},
     {id:"QF4", seq:4, round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  home:"ARG", away:"SUI", winner:null},
-    {id:"SF1", seq:5, round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF2"], home:null, away:null, winner:null},
-    {id:"SF2", seq:6, round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF3","QF4"], home:null, away:null, winner:null},
+    {id:"SF1", seq:5, round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF3"], home:null, away:null, winner:null},
+    {id:"SF2", seq:6, round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF2","QF4"], home:null, away:null, winner:null},
     {id:"F",   seq:7, round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
   ],
 };
