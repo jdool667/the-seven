@@ -36,6 +36,9 @@
   .player-row .status.paid{ color:var(--accent); }
   .player-row .status.owes{ color:var(--dead); }
   .pot-footer{ margin-top:10px; padding-top:10px; color:var(--muted); font-weight:600; }
+  .player-row .flag{ font-size:1.15rem; margin-right:8px; }
+  .odds-note{ color:var(--muted); font-size:0.85rem; }
+  .odds-price{ font-weight:600; color:var(--accent); }
   .draw-btn{ display:block; width:100%; font-size:1.3rem; font-weight:700; letter-spacing:0.01em; padding:16px; border:none; border-radius:10px; background:var(--accent); color:var(--card); cursor:pointer; }
   .draw-btn:hover{ opacity:0.9; }
   .draw-btn:disabled{ opacity:0.6; cursor:default; }
@@ -113,6 +116,10 @@ const DATA = {
   ],
   houseTeam: null,               // team id owned by "The House" (only if England out)
   teams: ["MAR","FRA","NOR","ESP","BEL","ARG","SUI"],  // draw pool: the 7 non-England QF teams
+  odds: {                        // outright winner, fractional — refresh at each redeploy, drop eliminated teams
+    FRA:"15/8", ESP:"7/2", ARG:"4/1", ENG:"5/1", NOR:"16/1", MAR:"33/1", BEL:"50/1", SUI:"80/1",
+  },
+  oddsUpdated: "8 Jul",
   matches: [                     // winner: team id or null; dates/times are UK
     {id:"QF1", round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  home:"FRA", away:"MAR", winner:null},
     {id:"QF2", round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
@@ -207,6 +214,36 @@ function renderPotCard(app){
   app.append(card);
 }
 
+function renderOddsCard(app){
+  if (champion()) return;
+  const entries = Object.entries(DATA.odds)
+    .filter(([id]) => !isEliminated(id))
+    .map(([id, price]) => {
+      const [n, d] = price.split("/").map(Number);
+      return {id, price, value: n / d};
+    })
+    .sort((a, b) => a.value - b.value);
+  if (!entries.length) return;
+
+  const card = el("div","card");
+  card.append(el("h2", null, "Odds to win it"));
+  entries.forEach(({id, price}) => {
+    const t = team(id);
+    const row = el("div","player-row");
+    const left = el("span");
+    left.append(el("span","flag", t.flag));
+    left.append(el("span", null, t.name));
+    const owner = ownerOf(id);
+    if (owner) left.append(el("span","odds-note", ` · ${owner.name}`));
+    else if (id === "ENG") left.append(el("span","odds-note", " · excluded"));
+    row.append(left);
+    row.append(el("span","odds-price", price));
+    card.append(row);
+  });
+  card.append(el("p","result-caption", `Outright winner · updated ${DATA.oddsUpdated}`));
+  app.append(card);
+}
+
 function renderPreDraw(app){
   renderHeader(app);
 
@@ -240,6 +277,7 @@ function renderDraw(app){
   card.append(btn);
   app.append(card);
   renderRoad(app);
+  renderOddsCard(app);
   renderPotCard(app);
 
   const SLOT_MS = 2500;
@@ -437,6 +475,7 @@ function renderDrawn(app){
   renderHeader(app);
   renderStatusBoard(app);
   renderBracket(app);
+  renderOddsCard(app);
   renderPotCard(app);
 }
 render();
