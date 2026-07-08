@@ -478,5 +478,17 @@ function renderDrawn(app){
   renderOddsCard(app);
   renderPotCard(app);
 }
-render();
+
+// Live odds: GitHub Pages serves odds.json (refreshed by a scheduled Action);
+// the Claude Artifact blocks fetch, so the baked DATA.odds is the fallback.
+fetch("odds.json", {cache: "no-store"})
+  .then(r => (r.ok ? r.json() : null))
+  .catch(() => null)
+  .then(live => {
+    if (live && live.odds && Object.keys(live.odds).length){
+      DATA.odds = live.odds;
+      DATA.oddsUpdated = live.updated;
+    }
+    render();
+  });
 </script>
