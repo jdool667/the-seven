@@ -44,13 +44,14 @@ try {
   const fixtureLines = todo.map(f =>
     `- ${NAMES[f.home]} (owned by ${OWNERS[f.home]}) vs ${NAMES[f.away]} (owned by ${OWNERS[f.away]})`).join("\n");
 
-  const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${OR_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "anthropic/claude-sonnet-4.5",
-      max_tokens: 2000,
-      messages: [{ role: "user", content:
+  // free models only (zero-credit key); they rate-limit often, so try several —
+  // a fully failed run just retries at the next scheduled workflow
+  const MODELS = [
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "qwen/qwen3-next-80b-a3b-instruct:free",
+    "qwen/qwen3-coder:free",
+  ];
+  const content =
 `Seven mates run a World Cup sweepstake: each was randomly drawn a team, winner takes the £140 pot. Write a hype blurb for each upcoming fixture below.
 
 Fixtures:
@@ -62,13 +63,25 @@ Rules for each blurb:
 - Refer to owners by name. If a team is owned by "nobody" (England), roast England and note the whole group is against them instead.
 - No slurs, nothing about protected traits — punch at the lifestyle details given.
 
-Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.` }],
-    }),
-  });
-  const data = await llm.json();
-  if (!data.choices) throw new Error(`OpenRouter: ${JSON.stringify(data.error || data)}`);
-  const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
-  const fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
+Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.`;
+
+  let fresh = null, lastErr = null;
+  for (const model of MODELS) {
+    try {
+      const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${OR_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model, max_tokens: 2000, messages: [{ role: "user", content }] }),
+      });
+      const data = await llm.json();
+      if (!data.choices) throw new Error(JSON.stringify(data.error || data));
+      const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
+      fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
+      if (fresh.length) { console.log(`generated via ${model}`); break; }
+      throw new Error("empty/invalid blurb list");
+    } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
+  }
+  if (!fresh || !fresh.length) throw lastErr || new Error("all models failed");
 
   const updated = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Europe/London", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
