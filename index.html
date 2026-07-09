@@ -63,6 +63,9 @@
   .match-side.loser .owner{ color:var(--dead); }
   .match-side.pending{ color:var(--muted); font-style:italic; }
   .match-odds{ color:var(--gold); font-size:0.85rem; font-weight:600; }
+  .hype-item + .hype-item{ margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+  .hype-match{ font-weight:700; margin-bottom:4px; }
+  .hype-text{ margin:0; }
   .champion-card{ border:2px solid var(--gold); text-align:center; font-weight:700; font-size:1.1rem; }
   .celebration-banner{ text-align:center; border:2px solid var(--gold); }
   .celebration-banner .trophy{ display:block; font-size:2.5rem; margin-bottom:8px; }
@@ -118,6 +121,12 @@ const DATA = {
     {home:"ARG", away:"SUI", prices:{ARG:"1.7", SUI:"5.5", draw:"3.5"}},
   ],
   oddsUpdated: "8 Jul, 11:54am",
+  hype: [                        // pre-match banter — fallback; hype.json (LLM-generated) overrides
+    {home:"FRA", away:"MAR", text:"The favourites France roll into town with Bell clinging to them like a rip current — fitting, since the man who spent all winter indoors cataloguing insects is now one Mbappé masterclass away from £140 in a sport he openly doesn't like. Dom's Morocco are the 6/1 outsiders, but he's officially liked football for nearly three months now, so expect expert tactical analysis delivered through a haze of smoke and Aberdeen-flavoured tears."},
+    {home:"NOR", away:"ENG", text:"Norway v England, and for once the group chat is fully united behind the Norwegians — Todd included, assuming he can put the guitar down for two hours on a Saturday night. If Haaland does to England's back line what Year 9 at St Mary's does to Todd every weekday, the £140 dream stays alive and nobody has to pretend to be happy for the Three Lions."},
+    {home:"BEL", away:"ESP", text:"Friday night and Will's Spain are heavy favourites, which is awkward for a man who'd rather be grinding his PhD or heroically hurling himself under children on Prague slides than watching a football match. Darley's Belgium are the long shot, but rest assured he'll mention he lives in London before kickoff and miss both goals scanning the crowd cam."},
+    {home:"ARG", away:"SUI", text:"A 2am kickoff suits Ethan down to the ground — it's the one hour of the day he's awake and technically not being unproductive, watching Messi's heirs chase the £140 his car finance is screaming for. Perez's Switzerland are outsiders, but the man's buying a house in a city he's never set foot in, so backing long odds sight unseen is frankly on brand — he'll watch it how he watched his childhood: sat under a desk."},
+  ],
   matches: [                     // winner: team id or null; dates/times are UK; seq = true kickoff order
     {id:"QF1", seq:1, round:"Quarter-final", date:"Thu 9 Jul",  time:"9pm",  home:"FRA", away:"MAR", winner:null},
     {id:"QF2", seq:3, round:"Quarter-final", date:"Sat 11 Jul", time:"10pm", home:"NOR", away:"ENG", winner:null},
@@ -411,8 +420,32 @@ function renderBracket(app){
   }
 }
 
+function renderHype(app){
+  const items = [];
+  for (const m of [...DATA.matches].sort((a, b) => a.seq - b.seq)){
+    if (m.winner || !m.home || !m.away) continue;
+    const entry = (DATA.hype || []).find(e =>
+      (e.home === m.home && e.away === m.away) ||
+      (e.home === m.away && e.away === m.home));
+    if (entry) items.push({m, text: entry.text});
+  }
+  if (!items.length) return;
+
+  const card = el("div","card");
+  card.append(el("h2", null, "The hype 🎙️"));
+  items.forEach(({m, text}) => {
+    const th = team(m.home), ta = team(m.away);
+    const block = el("div","hype-item");
+    block.append(el("div","hype-match", `${th.flag} ${th.name} v ${ta.name} ${ta.flag} · ${m.date}, ${m.time}`));
+    block.append(el("p","hype-text", text));
+    card.append(block);
+  });
+  app.append(card);
+}
+
 function renderDrawn(app){
   renderHeader(app);
+  renderHype(app);
   const champCopy = championCopy();
   if (champCopy){
     const banner = el("div","card celebration-banner");
@@ -446,12 +479,13 @@ function applyResults(results){
 // Live data: GitHub Pages serves odds.json and results.json (refreshed by a
 // scheduled Action); the Claude Artifact blocks fetch, so baked DATA is the fallback.
 const load = url => fetch(url, {cache: "no-store"}).then(r => (r.ok ? r.json() : null)).catch(() => null);
-Promise.all([load("odds.json"), load("results.json")]).then(([liveOdds, liveResults]) => {
+Promise.all([load("odds.json"), load("results.json"), load("hype.json")]).then(([liveOdds, liveResults, liveHype]) => {
   if (liveOdds && liveOdds.odds && Object.keys(liveOdds.odds).length){
     DATA.odds = liveOdds.odds;
     DATA.oddsUpdated = liveOdds.updated;
     if (liveOdds.h2h) DATA.h2h = liveOdds.h2h;
   }
+  if (liveHype && liveHype.hype && liveHype.hype.length) DATA.hype = liveHype.hype;
   applyResults((liveResults && liveResults.results) || []);
   render();
 });
