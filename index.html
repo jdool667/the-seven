@@ -431,15 +431,14 @@ function renderHype(app){
   }
   if (!items.length) return;
 
+  const {m, text} = items[0];   // just the next game up
   const card = el("div","card");
-  card.append(el("h2", null, "The hype 🎙️"));
-  items.forEach(({m, text}) => {
-    const th = team(m.home), ta = team(m.away);
-    const block = el("div","hype-item");
-    block.append(el("div","hype-match", `${th.flag} ${th.name} v ${ta.name} ${ta.flag} · ${m.date}, ${m.time}`));
-    block.append(el("p","hype-text", text));
-    card.append(block);
-  });
+  card.append(el("h2", null, "Next up 🎙️"));
+  const th = team(m.home), ta = team(m.away);
+  const block = el("div","hype-item");
+  block.append(el("div","hype-match", `${th.flag} ${th.name} v ${ta.name} ${ta.flag} · ${m.date}, ${m.time}`));
+  block.append(el("p","hype-text", text));
+  card.append(block);
   app.append(card);
 }
 
