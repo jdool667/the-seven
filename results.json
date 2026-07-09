@@ -1,4 +1,13 @@
 {
-  "updated": "9 Jul, 3:33pm",
-  "results": []
+  "updated": "10 Jul, 12:47am",
+  "results": [
+    {
+      "home": "FRA",
+      "away": "MAR",
+      "hs": 2,
+      "as": 0,
+      "winner": "FRA",
+      "pens": false
+    }
+  ]
 }

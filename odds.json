@@ -1,30 +1,20 @@
 {
-  "updated": "9 Jul, 3:33pm",
+  "updated": "10 Jul, 12:47am",
   "odds": {
-    "FRA": "3.1",
-    "ARG": "5.1",
-    "ESP": "5.2",
-    "ENG": "5.9",
+    "FRA": "2.56",
+    "ARG": "5.6",
+    "ESP": "5.6",
+    "ENG": "6",
     "NOR": "18.5",
-    "MAR": "34",
-    "BEL": "38",
-    "SUI": "42"
+    "BEL": "44",
+    "SUI": "48"
   },
   "h2h": [
-    {
-      "home": "FRA",
-      "away": "MAR",
-      "prices": {
-        "FRA": "1.57",
-        "MAR": "6.23",
-        "draw": "3.8"
-      }
-    },
     {
       "home": "ESP",
       "away": "BEL",
       "prices": {
-        "BEL": "5.28",
+        "BEL": "5.5",
         "ESP": "1.62",
         "draw": "3.9"
       }
@@ -33,18 +23,18 @@
       "home": "NOR",
       "away": "ENG",
       "prices": {
-        "ENG": "1.83",
-        "NOR": "4.15",
-        "draw": "3.63"
+        "ENG": "1.85",
+        "NOR": "4.1",
+        "draw": "3.6"
       }
     },
     {
       "home": "ARG",
       "away": "SUI",
       "prices": {
-        "ARG": "1.7",
+        "ARG": "1.67",
         "SUI": "5.5",
-        "draw": "3.58"
+        "draw": "3.5"
       }
     }
   ]
