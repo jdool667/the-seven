@@ -1,5 +1,5 @@
 {
-  "updated": "9 Jul, 3:21pm",
+  "updated": "9 Jul, 3:33pm",
   "odds": {
     "FRA": "3.1",
     "ARG": "5.1",
@@ -16,7 +16,7 @@
       "away": "MAR",
       "prices": {
         "FRA": "1.57",
-        "MAR": "6.25",
+        "MAR": "6.23",
         "draw": "3.8"
       }
     },
@@ -24,7 +24,7 @@
       "home": "ESP",
       "away": "BEL",
       "prices": {
-        "BEL": "5.3",
+        "BEL": "5.28",
         "ESP": "1.62",
         "draw": "3.9"
       }
@@ -34,8 +34,8 @@
       "away": "ENG",
       "prices": {
         "ENG": "1.83",
-        "NOR": "4.2",
-        "draw": "3.65"
+        "NOR": "4.15",
+        "draw": "3.63"
       }
     },
     {
