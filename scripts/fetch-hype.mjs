@@ -57,10 +57,10 @@ Fixtures:
 ${fixtureLines}
 
 Rules for each blurb:
-- 2-3 sentences, British lad-banter tone: sharp, funny, good-natured.
-- Hype the match AND take the piss out of both owners using their personal details.
+- 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang used naturally (mate, melt, rinsed, bottle it, hasn't got a clue, bloody), never forced.
+- Hype the match AND take the piss out of both owners using their personal details. The joke should land on the owner, not just the team.
 - Refer to owners by name. If a team is owned by "nobody" (England), roast England and note the whole group is against them instead.
-- No slurs, nothing mean about protected traits — punch at the lifestyle details given.
+- No slurs, nothing about protected traits — punch at the lifestyle details given.
 
 Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.` }],
     }),
