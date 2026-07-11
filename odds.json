@@ -1,30 +1,21 @@
 {
-  "updated": "11 Jul, 1:58pm",
+  "updated": "12 Jul, 12:29am",
   "odds": {
-    "FRA": "2.62",
+    "FRA": "2.58",
     "ESP": "4.5",
-    "ARG": "5.5",
-    "ENG": "6.4",
-    "NOR": "18.5",
+    "ENG": "4.9",
+    "ARG": "6",
+    "NOR": "50",
     "SUI": "55"
   },
   "h2h": [
     {
-      "home": "NOR",
-      "away": "ENG",
-      "prices": {
-        "ENG": "1.92",
-        "NOR": "3.8",
-        "draw": "3.6"
-      }
-    },
-    {
       "home": "ARG",
       "away": "SUI",
       "prices": {
-        "ARG": "1.67",
+        "ARG": "1.7",
         "SUI": "5.5",
-        "draw": "3.5"
+        "draw": "3.48"
       }
     },
     {
@@ -32,8 +23,8 @@
       "away": "ESP",
       "prices": {
         "FRA": "2.3",
-        "ESP": "3.1",
-        "draw": "3.2"
+        "ESP": "3.2",
+        "draw": "3.25"
       }
     }
   ]
