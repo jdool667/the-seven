@@ -22,7 +22,7 @@ const OWNERS = {
   ARG: "Ethan — on benefits, the slowest and most unproductive person you'll ever meet, financing a car he clearly can't afford",
   ESP: "Will — locked in on his PhD, found saving kids on slides in Prague and sacrificing himself in the process, doesn't like football",
   FRA: "Bell — beach lifeguard and makes it his whole personality, spent all of last winter as a hermit indoors doing nothing, obsessed with bugs and insects, doesn't like football",
-  ENG: "nobody — England are excluded from the sweepstake, so the entire group is rooting against them",
+  ENG: "nobody — if England wins, the pot refunds and everyone gets their £20 back, the anticlimax nightmare the whole group is desperate to avoid",
 };
 
 const hypePath = new URL("../hype.json", import.meta.url);
@@ -33,13 +33,15 @@ try {
   const res = await fetch(`https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/events/?apiKey=${ODDS_KEY}`);
   if (!res.ok) throw new Error(`Odds API ${res.status}`);
   const fixtures = (await res.json())
-    .map(e => ({ home: IDS[e.home_team], away: IDS[e.away_team] }))
-    .filter(f => f.home && f.away);
+    .map(e => ({ home: IDS[e.home_team], away: IDS[e.away_team], start: e.commence_time }))
+    .filter(f => f.home && f.away)
+    .sort((a, b) => new Date(a.start) - new Date(b.start));
 
   const covered = f => existing.some(e =>
     (e.home === f.home && e.away === f.away) || (e.home === f.away && e.away === f.home));
-  const todo = fixtures.filter(f => !covered(f));
-  if (!todo.length) { console.log("no new fixtures to hype"); process.exit(0); }
+  const soonest = fixtures.find(f => !covered(f));
+  if (!soonest) { console.log("no new fixtures to hype"); process.exit(0); }
+  const todo = [soonest];
 
   const fixtureLines = todo.map(f =>
     `- ${NAMES[f.home]} (owned by ${OWNERS[f.home]}) vs ${NAMES[f.away]} (owned by ${OWNERS[f.away]})`).join("\n");
@@ -61,7 +63,7 @@ ${fixtureLines}
 Rules for each blurb:
 - 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang use[...]
 - Hype the match AND take the piss out of both owners using their personal details. The joke should land on the owner, not just the team.
-- Refer to owners by name. If a team is owned by "nobody" (England), roast England and note the whole group is against them instead.
+- Refer to owners by name. If a team is owned by "nobody" (England), roast England as the anticlimax refund scenario the whole group dreads.
 - No slurs, nothing about protected traits — punch at the lifestyle details given.
 
 Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.`;
