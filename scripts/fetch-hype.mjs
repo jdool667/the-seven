@@ -65,7 +65,10 @@ Rules for each blurb:
 
 Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.`;
 
-  let fresh = null, lastErr = null;
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+let fresh = null, lastErr = null;
+outer: for (let attempt = 0; attempt < 4; attempt++) {
   for (const model of MODELS) {
     try {
       const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -77,10 +80,15 @@ Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","te
       if (!data.choices) throw new Error(JSON.stringify(data.error || data));
       const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
       fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
-      if (fresh.length) { console.log(`generated via ${model}`); break; }
+      if (fresh.length) { console.log(`generated via ${model} (attempt ${attempt + 1})`); break outer; }
       throw new Error("empty/invalid blurb list");
     } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
   }
+  const wait = (JSON.parse(lastErr?.message || "{}")?.metadata?.retry_after_seconds ?? 25) + 5;
+  console.log(`retrying in ${wait}s...`);
+  await sleep(wait * 1000);
+}
+
   if (!fresh || !fresh.length) throw lastErr || new Error("all models failed");
 
   const updated = new Intl.DateTimeFormat("en-GB", {
