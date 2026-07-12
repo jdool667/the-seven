@@ -1,29 +1,28 @@
 {
-  "updated": "12 Jul, 2:09am",
+  "updated": "12 Jul, 5:56am",
   "odds": {
-    "FRA": "2.6",
-    "ESP": "4.5",
+    "FRA": "2.64",
     "ENG": "4.5",
-    "ARG": "6",
-    "SUI": "60"
+    "ESP": "4.6",
+    "ARG": "5.5"
   },
   "h2h": [
-    {
-      "home": "ARG",
-      "away": "SUI",
-      "prices": {
-        "ARG": "1.76",
-        "SUI": "5.25",
-        "draw": "3.13"
-      }
-    },
     {
       "home": "FRA",
       "away": "ESP",
       "prices": {
         "FRA": "2.3",
         "ESP": "3.2",
-        "draw": "3.2"
+        "draw": "3.25"
+      }
+    },
+    {
+      "home": "ENG",
+      "away": "ARG",
+      "prices": {
+        "ARG": "2.9",
+        "ENG": "2.48",
+        "draw": "3.13"
       }
     }
   ]
