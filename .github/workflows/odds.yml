@@ -27,4 +27,4 @@ jobs:
           git config user.name "odds-bot"
           git config user.email "actions@users.noreply.github.com"
           git add odds.json results.json hype.json
-          git diff --cached --quiet || { git commit -m "odds/results update"; git push; }
+          git diff --cached --quiet || { git commit -m "odds/results update"; git fetch origin main; git rebase origin/main; git push; }
