@@ -65,6 +65,7 @@ Rules for each blurb:
 - Hype the match AND take the piss out of both owners using their personal details. The joke should land on the owner, not just the team.
 - Refer to owners by name. If a team is owned by "nobody" (England), roast England as the anticlimax refund scenario the whole group dreads.
 - No slurs, nothing about protected traits — punch at the lifestyle details given.
+- ONLY reference the people, facts and details given above. Never invent names, past sweepstakes, previous events, or anything not stated — no fictional mates, no made-up history.
 
 Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","text":"..."}] using the 3-letter codes ${todo.map(f => `${f.home}/${f.away}`).join(", ")}.`;
 
