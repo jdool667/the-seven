@@ -47,9 +47,10 @@ try {
   // free models only (zero-credit key); they rate-limit often, so try several —
   // a fully failed run just retries at the next scheduled workflow
   const MODELS = [
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "tencent/hy3:free",
     "meta-llama/llama-3.3-70b-instruct:free",
-    "qwen/qwen3-next-80b-a3b-instruct:free",
-    "qwen/qwen3-coder:free",
+    "openrouter/free",
   ];
   const content =
 `Seven mates run a World Cup sweepstake: each was randomly drawn a team, winner takes the £140 pot. Write a hype blurb for each upcoming fixture below.
@@ -58,7 +59,7 @@ Fixtures:
 ${fixtureLines}
 
 Rules for each blurb:
-- 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang used naturally (mate, melt, rinsed, bottle it, hasn't got a clue, bloody), never forced.
+- 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang use[...]
 - Hype the match AND take the piss out of both owners using their personal details. The joke should land on the owner, not just the team.
 - Refer to owners by name. If a team is owned by "nobody" (England), roast England and note the whole group is against them instead.
 - No slurs, nothing about protected traits — punch at the lifestyle details given.
@@ -67,27 +68,27 @@ Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","te
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-let fresh = null, lastErr = null;
-outer: for (let attempt = 0; attempt < 4; attempt++) {
-  for (const model of MODELS) {
-    try {
-      const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${OR_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ model, max_tokens: 2000, messages: [{ role: "user", content }] }),
-      });
-      const data = await llm.json();
-      if (!data.choices) throw new Error(JSON.stringify(data.error || data));
-      const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
-      fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
-      if (fresh.length) { console.log(`generated via ${model} (attempt ${attempt + 1})`); break outer; }
-      throw new Error("empty/invalid blurb list");
-    } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
+  let fresh = null, lastErr = null;
+  outer: for (let attempt = 0; attempt < 4; attempt++) {
+    for (const model of MODELS) {
+      try {
+        const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${OR_KEY}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model, max_tokens: 8000, reasoning: { enabled: false }, messages: [{ role: "user", content }] }),
+        });
+        const data = await llm.json();
+        if (!data.choices) throw new Error(JSON.stringify(data.error || data));
+        const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
+        fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
+        if (fresh.length) { console.log(`generated via ${model} (attempt ${attempt + 1})`); break outer; }
+        throw new Error("empty/invalid blurb list");
+      } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
+    }
+    let wait = 30;
+    try { wait = (JSON.parse(lastErr?.message)?.metadata?.retry_after_seconds ?? 25) + 5; } catch {}
+    if (attempt < 3) { console.log(`retrying in ${wait}s…`); await sleep(wait * 1000); }
   }
-  const wait = (JSON.parse(lastErr?.message || "{}")?.metadata?.retry_after_seconds ?? 25) + 5;
-  console.log(`retrying in ${wait}s...`);
-  await sleep(wait * 1000);
-}
 
   if (!fresh || !fresh.length) throw lastErr || new Error("all models failed");
 
