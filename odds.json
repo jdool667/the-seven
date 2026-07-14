@@ -1,19 +1,19 @@
 {
-  "updated": "14 Jul, 5:30am",
+  "updated": "14 Jul, 2:11pm",
   "odds": {
     "FRA": "2.54",
     "ESP": "4.4",
-    "ENG": "4.5",
-    "ARG": "5.9"
+    "ENG": "4.6",
+    "ARG": "5.8"
   },
   "h2h": [
     {
       "home": "FRA",
       "away": "ESP",
       "prices": {
-        "FRA": "2.37",
-        "ESP": "3.1",
-        "draw": "3.25"
+        "FRA": "2.38",
+        "ESP": "3.2",
+        "draw": "3.1"
       }
     },
     {
@@ -21,7 +21,7 @@
       "away": "ARG",
       "prices": {
         "ARG": "3",
-        "ENG": "2.6",
+        "ENG": "2.62",
         "draw": "2.9"
       }
     }
