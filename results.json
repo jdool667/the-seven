@@ -3,6 +3,38 @@
   "results": [
     {
       "home": "FRA",
+      "away": "MAR",
+      "hs": 2,
+      "as": 0,
+      "winner": "FRA",
+      "pens": false
+    },
+    {
+      "home": "ESP",
+      "away": "BEL",
+      "hs": 2,
+      "as": 1,
+      "winner": "ESP",
+      "pens": false
+    },
+    {
+      "home": "NOR",
+      "away": "ENG",
+      "hs": 1,
+      "as": 2,
+      "winner": "ENG",
+      "pens": false
+    },
+    {
+      "home": "ARG",
+      "away": "SUI",
+      "hs": 3,
+      "as": 1,
+      "winner": "ARG",
+      "pens": false
+    },
+    {
+      "home": "FRA",
       "away": "ESP",
       "hs": 0,
       "as": 2,
