@@ -1,5 +1,5 @@
 {
-  "updated": "15 Jul, 2:15pm",
+  "updated": "16 Jul, 12:31am",
   "results": [
     {
       "home": "FRA",
@@ -39,6 +39,14 @@
       "hs": 0,
       "as": 2,
       "winner": "ESP",
+      "pens": false
+    },
+    {
+      "home": "ENG",
+      "away": "ARG",
+      "hs": 1,
+      "as": 2,
+      "winner": "ARG",
       "pens": false
     }
   ]

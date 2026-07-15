@@ -1,18 +1,26 @@
 {
-  "updated": "15 Jul, 2:15pm",
+  "updated": "16 Jul, 12:31am",
   "odds": {
-    "ESP": "1.72",
-    "ENG": "4.3",
-    "ARG": "5.2"
+    "ESP": "1.7",
+    "ARG": "2.4"
   },
   "h2h": [
     {
-      "home": "ENG",
+      "home": "FRA",
+      "away": "ENG",
+      "prices": {
+        "ENG": "3.5",
+        "FRA": "1.96",
+        "draw": "3.7"
+      }
+    },
+    {
+      "home": "ESP",
       "away": "ARG",
       "prices": {
-        "ARG": "3",
-        "ENG": "2.7",
-        "draw": "2.88"
+        "ARG": "3.5",
+        "ESP": "2.25",
+        "draw": "3"
       }
     }
   ]
