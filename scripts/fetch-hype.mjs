@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const ODDS_KEY = process.env.ODDS_API_KEY;
 const OR_KEY = process.env.OPENROUTER_API_KEY;
+const FORCE_REGEN = process.argv.includes("--force");
 if (!ODDS_KEY || !OR_KEY) { console.log("keys not set, skipping hype"); process.exit(0); }
 
 const IDS = {
@@ -32,16 +33,18 @@ try { existing = JSON.parse(readFileSync(hypePath, "utf8")).hype || []; } catch 
 try {
   const res = await fetch(`https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/events/?apiKey=${ODDS_KEY}`);
   if (!res.ok) throw new Error(`Odds API ${res.status}`);
+  const now = new Date();
   const fixtures = (await res.json())
     .map(e => ({ home: IDS[e.home_team], away: IDS[e.away_team], start: e.commence_time }))
-    .filter(f => f.home && f.away)
+    .filter(f => f.home && f.away && new Date(f.start) > now)
     .sort((a, b) => new Date(a.start) - new Date(b.start));
 
   const covered = f => existing.some(e =>
     (e.home === f.home && e.away === f.away) || (e.home === f.away && e.away === f.home));
   const soonest = fixtures.find(f => !covered(f));
-  if (!soonest) { console.log("no new fixtures to hype"); process.exit(0); }
-  const todo = [soonest];
+  if (!soonest && !FORCE_REGEN) { console.log("no new fixtures to hype"); process.exit(0); }
+  const todo = FORCE_REGEN && existing.length ? [existing[0]] : [soonest].filter(Boolean);
+  if (!todo.length) { console.log("no fixtures available"); process.exit(0); }
 
   const fixtureLines = todo.map(f =>
     `- ${NAMES[f.home]} (owned by ${OWNERS[f.home]}) vs ${NAMES[f.away]} (owned by ${OWNERS[f.away]})`).join("\n");
@@ -99,7 +102,10 @@ Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","te
     timeZone: "Europe/London", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
   }).format(new Date()).replace(" am", "am").replace(" pm", "pm");
 
-  writeFileSync(hypePath, JSON.stringify({ updated, hype: [...existing, ...fresh] }, null, 2) + "\n");
+  const newHype = FORCE_REGEN 
+    ? fresh 
+    : [...existing, ...fresh];
+  writeFileSync(hypePath, JSON.stringify({ updated, hype: newHype }, null, 2) + "\n");
   console.log(`wrote hype.json: ${fresh.length} new blurb(s)`);
 } catch (err) {
   console.log(`hype generation skipped: ${err.message}`);
