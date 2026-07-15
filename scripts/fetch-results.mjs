@@ -32,11 +32,20 @@ for (const m of scores) {
   let winner = hs > as ? home : as > hs ? away : null;
   const pens = !winner;
   if (pens) {
-    // knockout draw → decided on penalties; the winner shows up in a later fixture
+    // knockout draw → decided on penalties; the winner advanced to a later fixture
+    // compute each team's latest commence_time in later fixtures (0 if none)
     const later = fixtures.filter(e => new Date(e.commence_time) > new Date(m.commence_time));
-    const advanced = id => later.some(e => IDS[e.home_team] === id || IDS[e.away_team] === id);
-    if (advanced(home) && !advanced(away)) winner = home;
-    else if (advanced(away) && !advanced(home)) winner = away;
+    const latestTime = id => {
+      const team = IDS[id] || null;
+      if (!team) return 0;
+      const times = later.filter(e => IDS[e.home_team] === team || IDS[e.away_team] === team)
+        .map(e => new Date(e.commence_time).getTime());
+      return times.length > 0 ? Math.max(...times) : 0;
+    };
+    const homeTime = latestTime(m.home_team);
+    const awayTime = latestTime(m.away_team);
+    if (homeTime > awayTime) winner = home;
+    else if (awayTime > homeTime) winner = away;
   }
   if (winner) fetched.push({ home, away, hs, as, winner, pens });
   else console.log(`skipping ${home}–${away}: level score, winner not yet inferable`);
