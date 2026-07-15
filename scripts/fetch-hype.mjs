@@ -86,7 +86,10 @@ Reply with STRICT JSON only, no markdown fences: [{"home":"XXX","away":"XXX","te
         const data = await llm.json();
         if (!data.choices) throw new Error(JSON.stringify(data.error || data));
         const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
-        fresh = JSON.parse(raw).filter(e => e.home && e.away && e.text);
+        let parsed = JSON.parse(raw).filter(e => e.home && e.away && e.text);
+        // filter parsed to only entries whose home/away pair matches a todo fixture in either orientation
+        const todoPairs = new Set(todo.map(f => `${f.home}/${f.away}`).concat(todo.map(f => `${f.away}/${f.home}`)));
+        fresh = parsed.filter(e => todoPairs.has(`${e.home}/${e.away}`));
         if (fresh.length) { console.log(`generated via ${model} (attempt ${attempt + 1})`); break outer; }
         throw new Error("empty/invalid blurb list");
       } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
