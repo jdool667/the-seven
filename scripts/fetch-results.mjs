@@ -1,7 +1,7 @@
 // Fetches completed World Cup match results from The Odds API and writes results.json.
 // A level final score means penalties — the winner is inferred from which team
 // appears in a later fixture. Runs in GitHub Actions; needs ODDS_API_KEY.
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const KEY = process.env.ODDS_API_KEY;
 if (!KEY) { console.error("ODDS_API_KEY not set"); process.exit(1); }
@@ -20,7 +20,7 @@ async function get(path) {
 const scores = await get(`scores/?apiKey=${KEY}&daysFrom=3`);
 const fixtures = await get(`events/?apiKey=${KEY}`);   // upcoming fixtures; free endpoint
 
-const results = [];
+const fetched = [];
 for (const m of scores) {
   if (!m.completed || !m.scores) continue;
   const home = IDS[m.home_team], away = IDS[m.away_team];
@@ -38,9 +38,20 @@ for (const m of scores) {
     if (advanced(home) && !advanced(away)) winner = home;
     else if (advanced(away) && !advanced(home)) winner = away;
   }
-  if (winner) results.push({ home, away, hs, as, winner, pens });
+  if (winner) fetched.push({ home, away, hs, as, winner, pens });
   else console.log(`skipping ${home}–${away}: level score, winner not yet inferable`);
 }
+
+// Read existing results and merge: keep any existing result whose team pair isn't in fetched
+let existing = [];
+try {
+  const data = JSON.parse(readFileSync(new URL("../results.json", import.meta.url), "utf8"));
+  existing = data.results || [];
+} catch {}
+
+const fetchedPairs = new Set(fetched.map(r => `${r.home}/${r.away}`));
+const kept = existing.filter(r => !fetchedPairs.has(`${r.home}/${r.away}`));
+const results = [...kept, ...fetched];
 
 const updated = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
