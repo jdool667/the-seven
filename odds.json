@@ -1,5 +1,5 @@
 {
-  "updated": "16 Jul, 12:31am",
+  "updated": "16 Jul, 4:48am",
   "odds": {
     "ESP": "1.7",
     "ARG": "2.4"
@@ -10,16 +10,16 @@
       "away": "ENG",
       "prices": {
         "ENG": "3.5",
-        "FRA": "1.96",
-        "draw": "3.7"
+        "FRA": "1.95",
+        "draw": "3.72"
       }
     },
     {
       "home": "ESP",
       "away": "ARG",
       "prices": {
-        "ARG": "3.5",
-        "ESP": "2.25",
+        "ARG": "3.4",
+        "ESP": "2.3",
         "draw": "3"
       }
     }
