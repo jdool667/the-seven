@@ -23,7 +23,7 @@ const OWNERS = {
   ARG: "Ethan — on benefits, the slowest and most unproductive person you'll ever meet, financing a car he clearly can't afford",
   ESP: "Will — locked in on his PhD, found saving kids on slides in Prague and sacrificing himself in the process, doesn't like football",
   FRA: "Bell — beach lifeguard and makes it his whole personality, spent all of last winter as a hermit indoors doing nothing, obsessed with bugs and insects, doesn't like football",
-  ENG: "nobody — if England wins, the pot refunds and everyone gets their £20 back, the anticlimax nightmare the whole group is desperate to avoid",
+  ENG: "nobody — England lost the semi, so they're playing for bronze against Bell's France, and the £20 refund is dead",
 };
 
 const hypePath = new URL("../hype.json", import.meta.url);
@@ -64,9 +64,9 @@ Fixtures:
 ${fixtureLines}
 
 Rules for each blurb:
-- 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang use[...]
+- 2-3 sentences, proper English lads' group-chat banter: dry, specific and merciless but affectionate underneath — mates rinsing each other in the pub, NOT American trash talk. British slang use encouraged.
 - Hype the match AND take the piss out of both owners using their personal details. The joke should land on the owner, not just the team.
-- Refer to owners by name. If a team is owned by "nobody" (England), roast England as the anticlimax refund scenario the whole group dreads.
+- Refer to owners by name. If a team is owned by "nobody" (England), roast England as playing for bronze after losing the semi—all the pain, none of the refund.
 - No slurs, nothing about protected traits — punch at the lifestyle details given.
 - ONLY reference the people, facts and details given above. Never invent names, past sweepstakes, previous events, or anything not stated — no fictional mates, no made-up history.
 
