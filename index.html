@@ -134,7 +134,8 @@ const DATA = {
     {id:"QF4", seq:4, round:"Quarter-final", date:"Sun 12 Jul", time:"2am",  home:"ARG", away:"SUI", winner:null},
     {id:"SF1", seq:5, round:"Semi-final",    date:"Tue 14 Jul", time:"8pm", from:["QF1","QF3"], home:null, away:null, winner:null},
     {id:"SF2", seq:6, round:"Semi-final",    date:"Wed 15 Jul", time:"8pm", from:["QF2","QF4"], home:null, away:null, winner:null},
-    {id:"F",   seq:7, round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
+    {id:"TP", seq:7, round:"Third place", date:"Sat 18 Jul", time:"10pm", fromLosers:["SF1","SF2"], home:null, away:null, winner:null},
+    {id:"F",   seq:8, round:"Final",         date:"Sun 19 Jul", time:"8pm", from:["SF1","SF2"], home:null, away:null, winner:null},
   ],
 };
 
@@ -152,9 +153,17 @@ function h2hPrice(match, id){   // this team's win price for this fixture, if th
 }
 function sideTeamId(match, sideKey){   // team occupying a side, following a decided feeder tie
   if (match[sideKey]) return match[sideKey];
-  const fromId = match.from ? match.from[sideKey === "home" ? 0 : 1] : null;
-  const src = fromId ? matchById(fromId) : null;
-  return src && src.winner ? src.winner : null;
+  const idx = sideKey === "home" ? 0 : 1;
+  if (match.from){
+    const src = matchById(match.from[idx]);
+    return src && src.winner ? src.winner : null;
+  }
+  if (match.fromLosers){
+    const src = matchById(match.fromLosers[idx]);
+    if (src && src.winner && src.home && src.away)
+      return src.winner === src.home ? src.away : src.home;
+  }
+  return null;
 }
 
 function championCopy(){
