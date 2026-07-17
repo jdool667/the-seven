@@ -1,8 +1,8 @@
 {
-  "updated": "17 Jul, 5:44am",
+  "updated": "17 Jul, 2:07pm",
   "odds": {
     "ESP": "1.7",
-    "ARG": "2.4"
+    "ARG": "2.42"
   },
   "h2h": [
     {
@@ -10,7 +10,7 @@
       "away": "ENG",
       "prices": {
         "ENG": "3.75",
-        "FRA": "1.89",
+        "FRA": "1.9",
         "draw": "3.8"
       }
     },
