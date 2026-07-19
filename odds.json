@@ -1,18 +1,8 @@
 {
-  "updated": "19 Jul, 1:56pm",
+  "updated": "20 Jul, 12:31am",
   "odds": {
-    "ESP": "1.68",
-    "ARG": "2.44"
+    "ESP": "1.04",
+    "ARG": "17.5"
   },
-  "h2h": [
-    {
-      "home": "ESP",
-      "away": "ARG",
-      "prices": {
-        "ARG": "3.5",
-        "ESP": "2.25",
-        "draw": "3"
-      }
-    }
-  ]
+  "h2h": []
 }
