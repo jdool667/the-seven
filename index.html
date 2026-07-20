@@ -430,6 +430,16 @@ function renderBracket(app){
 }
 
 function renderHype(app){
+  const s = (DATA.hype || []).find(e => e.summary);
+  if (s){
+    const card = el("div","card");
+    card.append(el("h2", null, "That's a wrap \ud83c\udfc6"));
+    const block = el("div","hype-item");
+    block.append(el("p","hype-text", s.text));
+    card.append(block);
+    app.append(card);
+    return;
+  }
   const items = [];
   for (const m of [...DATA.matches].sort((a, b) => a.seq - b.seq)){
     if (m.winner || !m.home || !m.away) continue;
