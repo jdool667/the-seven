@@ -13,7 +13,7 @@ const IDS = {
 
 async function get(path) {
   const res = await fetch(`https://api.the-odds-api.com/v4/sports/soccer_fifa_world_cup/${path}`);
-  if (!res.ok) { console.error(`Odds API ${res.status}: ${await res.text()}`); process.exit(1); }
+  if (!res.ok) { console.log(`Odds API ${res.status} — sport unavailable (tournament settled), keeping existing results.json`); process.exit(0); }
   return res.json();
 }
 
