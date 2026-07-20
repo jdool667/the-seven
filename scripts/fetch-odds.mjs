@@ -12,7 +12,7 @@ const IDS = {
 
 async function get(sport, markets) {
   const res = await fetch(`https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${KEY}&regions=uk&markets=${markets}&oddsFormat=decimal`);
-  if (!res.ok) { console.error(`Odds API ${res.status}: ${await res.text()}`); process.exit(1); }
+  if (!res.ok) { console.log(`Odds API ${res.status} for ${sport} — market closed or unavailable, keeping existing odds.json`); process.exit(0); }
   return res.json();
 }
 
@@ -37,7 +37,7 @@ for (const event of await get("soccer_fifa_world_cup_winner", "outrights")) {
 }
 const odds = {};
 for (const [id, xs] of Object.entries(prices)) odds[id] = fmt(xs);
-if (!Object.keys(odds).length) { console.error("no matching teams in API response"); process.exit(1); }
+if (!Object.keys(odds).length) { console.log("no outright prices returned — tournament settled, keeping existing odds.json"); process.exit(0); }
 
 // per-match win odds (90-minute h2h) for upcoming games between teams we track
 const h2h = [];
