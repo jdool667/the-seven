@@ -41,6 +41,70 @@ try {
 
   const covered = f => existing.some(e =>
     (e.home === f.home && e.away === f.away) || (e.home === f.away && e.away === f.home));
+  // ---- Tournament over: one-off retrospective instead of match hype ----
+  if (!fixtures.length) {
+    if (existing.some(e => e.summary)) { console.log("tournament summary already written"); process.exit(0); }
+    const results = JSON.parse(readFileSync(new URL("../results.json", import.meta.url), "utf8")).results;
+    const champ = results[results.length - 1].winner; // the final is the last-played result
+    const resultLines = results.map(r => `${r.home} ${r.hs}-${r.as} ${r.away}${r.pens ? " (pens)" : ""}, ${r.winner} through`).join("\n");
+    const content =
+`The 2026 World Cup sweepstake is over. Seven mates each drew a team for £20; the tournament winner's owner takes the whole £140 pot. England were excluded — if they'd won the cup everyone would have been refunded their £20, but they lost the semi-final so the refund died there.
+
+The syndicate (team: owner):
+${Object.entries(OWNERS).map(([c, o]) => `- ${c}: ${o}`).join("\n")}
+
+Knockout results in order (QFs, semis, third place, final):
+${resultLines}
+
+${NAMES[champ]} won the World Cup, so ${NAMES[champ]}'s owner takes the £140 pot.
+
+Write ONE tournament retrospective blurb for the group's website hype section. Rules:
+- 130-180 words of British group-chat banter: sharp, affectionate, no hashtags, no corporate tone.
+- Crown the pot winner properly, especially if their owner blurb says they don't even like football.
+- Give at least a line each to: the runner-up's owner, the near-miss where England reaching the semi almost voided the pot, and the ten-goal third-place game.
+- Land one dig at an owner whose team went out in the quarters.
+- ONLY use the people, teams and results listed above. Never invent names, events, past sweepstakes, or anything not stated.
+Reply with STRICT JSON only, no markdown fences: {"summary": true, "text": "..."}`;
+
+    const zzz = ms => new Promise(r => setTimeout(r, ms));
+    const MODELS = [
+      "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "tencent/hy3:free",
+      "meta-llama/llama-3.3-70b-instruct:free",
+      "openrouter/free",
+    ];
+    let entry = null, lastErr = null;
+    outer: for (let attempt = 0; attempt < 4; attempt++) {
+      for (const model of MODELS) {
+        try {
+          const llm = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${OR_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ model, max_tokens: 8000, reasoning: { enabled: false }, messages: [{ role: "user", content }] }),
+          });
+          const data = await llm.json();
+          if (!data.choices) throw new Error(JSON.stringify(data.error || data));
+          const raw = data.choices[0].message.content.replace(/^```(json)?|```$/gm, "").trim();
+          const parsed = JSON.parse(raw);
+          if (!parsed.text || typeof parsed.text !== "string") throw new Error("no text in summary");
+          entry = { summary: true, text: parsed.text.trim() };
+          console.log(`summary via ${model} (attempt ${attempt + 1})`);
+          break outer;
+        } catch (err) { lastErr = err; console.log(`${model} failed: ${err.message}`); }
+      }
+      let wait = 30;
+      try { wait = (JSON.parse(lastErr?.message)?.metadata?.retry_after_seconds ?? 25) + 5; } catch {}
+      if (attempt < 3) { console.log(`retrying in ${wait}s...`); await zzz(wait * 1000); }
+    }
+    if (!entry) { console.log(`summary generation skipped: ${lastErr?.message}`); process.exit(0); }
+    const updated = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true,
+    }).format(new Date()).replace(" am", "am").replace(" pm", "pm");
+    writeFileSync(hypePath, JSON.stringify({ updated, hype: [...existing, entry] }, null, 2) + "\n");
+    console.log("wrote tournament summary");
+    process.exit(0);
+  }
+
   const soonest = fixtures.find(f => !covered(f));
   if (!soonest && !FORCE_REGEN) { console.log("no new fixtures to hype"); process.exit(0); }
   const todo = FORCE_REGEN && existing.length ? [existing[0]] : [soonest].filter(Boolean);
