@@ -435,7 +435,14 @@ function renderHype(app){
     const card = el("div","card");
     card.append(el("h2", null, "That's a wrap \ud83c\udfc6"));
     const block = el("div","hype-item");
-    block.append(el("p","hype-text", s.text));
+    if (s.sections && s.sections.length){
+      for (const sec of s.sections){
+        block.append(el("div","hype-match", sec.h));
+        block.append(el("p","hype-text", sec.text));
+      }
+    } else {
+      block.append(el("p","hype-text", s.text));
+    }
     card.append(block);
     app.append(card);
     return;
